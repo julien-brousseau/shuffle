@@ -1,3 +1,25 @@
+<script lang="ts">
+import Letter from './Letter.vue'
+
+export default {
+  components: { Letter },
+
+  props: { 
+    lineIndex: { type: Number, required: true },
+    lineText: { type: String, required: true },
+  },
+
+  setup (props) {
+    const letters = props.lineText.split('')
+      .map(l => ({ letter: l }))
+
+    return {
+      letters
+    }
+  }
+}
+</script>
+
 <template>
   <div class="line">
 
@@ -8,36 +30,6 @@
     
   </div>
 </template>
-
-<script lang="ts">
-import { chordsStore } from '../stores/chords'
-import Letter from './Letter.vue'
-import Chord from './Chord.vue'
-
-export default {
-  components: { Letter, Chord },
-
-  props: { 
-    lineIndex: { type: Number, required: true },
-    lineText: { type: String, required: true }, 
-    addSpace: { type: Boolean }, 
-  },
-
-  setup (props) {
-    // Build chords object to assign to letters
-    const store = chordsStore()
-    const chords = store.chordsByLine(props.lineIndex)
-
-    const letters = props.lineText.split('')
-      .map(l => ({ letter: l }))
-
-    return {
-      letters,
-      chords
-    }
-  }
-}
-</script>
 
 <style lang="scss">
   .line {

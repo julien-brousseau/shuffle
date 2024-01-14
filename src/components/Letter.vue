@@ -10,42 +10,41 @@ export default {
   },
 
   setup (props) {
-    const store = chordsStore();
-    const blop: Ref<HTMLElement|null> = ref(null)
+    const store = chordsStore()
+    const { chordByletterIndex, replaceChordAsStrings } = store
+
+    const letterElement: Ref<HTMLElement|null> = ref(null)
+    const chordElement: Ref<HTMLElement|null> = ref(null)
 
     const selectLetter = () => {
       store.selectLetter(props.lineIndex, props.letterIndex)
     }
 
-    const dragging = ref(false);
-    const leftOverride = ref(0);
+    const startDrag = (event: DragEvent, chord: any) => {
+      if (!event.dataTransfer) return;
 
-    const startDrag = () => {
-      console.log('on');
-      dragging.value = true;
-      window.addEventListener('mousemove', update)
-      document.addEventListener('mouseup', stopDrag, { once: true })
+      event.dataTransfer.dropEffect = 'move'
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('text/plain', `${ chord.lineIndex }-${ chord.letterIndex }-${ chord.name }`)
     }
-
-    const stopDrag = () => {
-      console.log('off');
-      dragging.value = false;
-      window.removeEventListener('mousemove', update)
+    
+    const onDrop = (event: DragEvent) => {
+      if (!event.dataTransfer) return;
+      
+      const chordStr = event.dataTransfer.getData('text');
+      replaceChordAsStrings(`${ props.lineIndex }-${ props.letterIndex }`, chordStr)
     }
-
-    const update = (event: MouseEvent) => { leftOverride.value = event.pageX }
 
     return {
-      blop,
+      letterElement,
+      chordElement,
       store,
       lineIndex: props.lineIndex,
       letterIndex: props.letterIndex,
       letter: props.letter,
       selectLetter,
-      dragging,
-      leftOverride,
       startDrag,
-      stopDrag,
+      onDrop
     }
   },
 
@@ -66,12 +65,18 @@ export default {
       return ` ${this.letter} `
     },
     left (): string {
-      const yPos = this.dragging ? this.leftOverride -( this.blop?.offsetLeft || 0) : this.blop?.offsetLeft
-      return (yPos || 0) + 'px';
+      if (!this.chordElement || !this.letterElement) return '0';
+      const offset = this.chordElement.offsetWidth / 2 - this.letterElement.offsetWidth / 2;
+      
+      const yPos = this.letterElement?.offsetLeft
+      // const yPos = this.dragging ? this.leftOverride : this.letterElement?.offsetLeft
+      return (yPos || 0) - offset + 'px';
     },
     top (): string {
-      const a = this.blop?.offsetTop
-      return (a || 0) + 'px';
+      const a = this.letterElement?.offsetTop
+      console.log(this.letterElement);
+      
+      return (a || 0) - 30 + 'px';
     },
   }
 }
@@ -79,16 +84,19 @@ export default {
 
 <template>
 
-  <span class="letter" :id="id" ref="blop"
+  <span class="letter" :id="id" ref="letterElement"
     :class="[{ isSpace, hasChord }, chord ? 'chord-' + chord.name : '']"
-    @click.stop="selectLetter">
+    @click.stop="selectLetter"
+    @drop="onDrop($event)"
+    @dragover.prevent
+    @dragenter.prevent>
       <span>{{ paddedLetter }}</span>
   </span>
 
-  <div class="chord" v-if="chord" :id="`for-${ id }`" 
-    @mousedown="startDrag" 
-    @mouseup="stopDrag"
-    :style="{ left }">
+  <div class="chord" v-if="chord" ref="chordElement" :id="`for-${ id }`" 
+    draggable="true"
+    @dragstart="startDrag($event, chord)"
+    :style="{ left, top }">
       {{ chord.name }}
   </div>
 
@@ -100,10 +108,11 @@ export default {
     position: relative;
     padding: 0;
     background-color: rgba(lightblue, 0);
-    font-size: 24px;
+    font-size: 20px;
     transition: 0.15s all ease;
     cursor: pointer;
     z-index: 1;
+    user-select: none;
 
     &::before {
       position: absolute;
@@ -137,7 +146,7 @@ export default {
     // &.hasChord {
     //   // Generates .chord-X classes for each chord
     //   $chords: 'A', 'B', 'C', 'D', 'E', 'F', 'G';
-    //   // $chords: v-bind(blop); //'A', 'B', 'C', 'D', 'E', 'F', 'G';
+    //   // $chords: v-bind(letterElement); //'A', 'B', 'C', 'D', 'E', 'F', 'G';
     //   @each $chord in $chords {
     //     &.chord-#{ $chord }::after { content: $chord }
     //   }
@@ -169,5 +178,6 @@ export default {
     background-color: orange;
     border-radius: 8px;
     font-size: 16px;
+    user-select: none;
   }
 </style>

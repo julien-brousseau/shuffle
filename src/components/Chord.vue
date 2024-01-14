@@ -1,62 +1,84 @@
 <script lang="ts">
-import { ref, toRefs } from 'vue';
+import { ref, toRefs, PropType } from 'vue';
+import { Chord } from '../types'
 
 export default {
   props: {
-    chordName: { type: String, required: true },
-    letterIndex: { type: Number, required: true }
+    chord: { type: Object as PropType<Chord>, required: true },
+    // chordName: { type: String, required: true },
+    // letterIndex: { type: Number, required: true }
   },
 
   setup (props) {
-    const { chordName, letterIndex } = toRefs(props)
+    const { chord } = toRefs(props)
 
-    const dragging = ref(false);
-    const leftOverride = ref(0);
+    // const dragging = ref(false);
+    // const leftOverride = ref(0);
 
-    const startDrag = () => {
-      console.log('on');
+    // const startDrag = () => {
+    //   console.log('on');
       
-      dragging.value = true;
-      window.addEventListener('mousemove', update)
-    }
+    //   dragging.value = true;
+    //   window.addEventListener('mousemove', update)
+    // }
 
-    const stopDrag = () => {
-      console.log('off');
+    // const stopDrag = () => {
+    //   console.log('off');
       
-      dragging.value = false;
-      window.removeEventListener('mousemove', update)
-    }
+    //   dragging.value = false;
+    //   window.removeEventListener('mousemove', update)
+    // }
 
-    const update = (event: MouseEvent) => { leftOverride.value = event.pageX }
+    // const update = (event: MouseEvent) => { leftOverride.value = event.pageX }
 
     return {
-      dragging,
-      leftOverride,
-      startDrag,
-      stopDrag,
-      chordName,
-      letterIndex
+      chord,
+      // name, lineIndex, letterIndex,
+      // dragging,
+      // leftOverride,
+      // startDrag,
+      // stopDrag,
+      // chordName,
+      // letterIndex
     }
   },
 
   computed: {
+    name () {
+      return this.chord.name
+    },
     left (): string {
-      return `${ this.dragging ? this.leftOverride : this.letterIndex }px`
+      return '1px'
+      // return `${ this.dragging ? this.leftOverride : this.letterIndex }px`
+    },
+    style () {
+      const letter = document.getElementById(`L${ this.chord.lineIndex }P${ this.chord.letterIndex }`)
+      console.log(this.chord.letterIndex);
+      
+      if (!letter) return {}
+
+      const {top, left} = letter.getBoundingClientRect();
+      console.log(top, left);
+      
+      return { top, left }
     }
   }
 }
 </script>
 
 <template>
-  <span @mousedown="startDrag" @mouseup="stopDrag" :style="{left}">{{ chordName }}</span>
+  <span class="chord" :style="style">{{ name }}</span>
+  <!-- <span @mousedown="startDrag" @mouseup="stopDrag" :style="{left}">{{ chordName }}</span> -->
 </template>
 
 <style lang="scss" scoped>
-  span {
-    position: absolute;
-    top: 0;
-    left: -20px;
-    background-color: red;
-    padding: 5px;
-  }
+.chord {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 8px 14px;
+  background-color: orange;
+  border-radius: 8px;
+  font-size: 16px;
+}
 </style>

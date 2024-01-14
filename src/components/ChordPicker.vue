@@ -1,17 +1,3 @@
-<template>
-  <div id="ChordPicker" v-if="visible" :style="{ top: position[0], left: position[1] }" @click.stop>
-
-    <div class="container">
-      <a v-for="c in Object.keys(chords)" @click="selectChord(c)">{{ c }}</a>
-    </div>
-
-    <div class="container" v-if="selectedChord">
-      <a v-for="a in selectedChordList" @click="addNewChord(a)">{{ a }}</a>
-    </div>
-
-  </div>
-</template>
-
 <script lang="ts">
 import { ref } from 'vue'
 import { chordsStore } from '../stores/chords'
@@ -84,6 +70,20 @@ export default {
   }
 }
 </script>
+
+<template>
+  <div id="ChordPicker" v-if="visible" :style="{ top: position[0], left: position[1] }" @click.stop>
+
+    <div class="container">
+      <a v-for="c in Object.keys(chords)" @click="selectChord(c)">{{ c }}</a>
+    </div>
+
+    <div class="container" v-if="selectedChord">
+      <a v-for="a in selectedChordList" @click="addNewChord(a)">{{ a }}</a>
+    </div>
+
+  </div>
+</template>
 
 <style lang="scss" scoped>
   #ChordPicker {

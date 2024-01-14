@@ -1,6 +1,7 @@
 <script lang="ts">
 import Header from './components/Header.vue'
 import Line from './components/Line.vue'
+// import Chord from './components/Chord.vue'
 import ChordPicker from './components/ChordPicker.vue'
 import { chordsStore } from './stores/chords'
 
@@ -9,7 +10,8 @@ export default {
     Header, Line, ChordPicker
   },
   setup() {
-    const { addChord, deselectLetter } = chordsStore()
+    const store = chordsStore();
+    const { addChord, deselectLetter } = store
 
     const title = 'Africa'
     const author = 'Toto'
@@ -60,13 +62,14 @@ export default {
     const chordsSeeder = [
       { lineIndex: 1, letterIndex: 20, name: 'E' },
       { lineIndex: 2, letterIndex: 15, name: 'D' },
-      { lineIndex: 3, letterIndex: 10, name: 'F' },
-      { lineIndex: 4, letterIndex: 5, name: 'B' },
-      { lineIndex: 5, letterIndex: 1, name: 'A' }
+      // { lineIndex: 3, letterIndex: 10, name: 'F' },
+      // { lineIndex: 4, letterIndex: 5, name: 'B' },
+      // { lineIndex: 5, letterIndex: 1, name: 'A' }
     ]
     chordsSeeder.forEach(chord => addChord(chord))
 
     return {
+      store,
       title, author, lyrics,
       clearSelection
     }
@@ -83,6 +86,9 @@ export default {
 
     <!-- Loop through all lyrics lines -->
     <Line v-for="line, i in lyrics" :key="i" :lineIndex="i" :lineText="line.text || ''" />
+
+    <!-- Chords -->
+    <!-- <Chord v-for="chord in store.chords" :chord="chord" /> -->
 
     <!-- Chord picker -->
     <ChordPicker />
